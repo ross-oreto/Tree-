@@ -9,7 +9,7 @@ namespace tree {
 	public:
 		Btree();
 		Btree(K, V);
-		int insert(K, V);
+		Btree insert(K, V);
 	protected:
 		K key;
 		V val;
@@ -41,8 +41,8 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
-	int Btree<K, V>::insert(K key, V value) {
+	Btree<K, V> Btree<K, V>::insert(K key, V value) {
 		cout << "hello world";
-		return 0;
+		return *this;
 	}
 }
