@@ -10,6 +10,9 @@ namespace tree {
 		Btree();
 		Btree(K, V);
 		Btree insert(K, V);
+		Btree remove();
+		Btree removeAt(K);
+		Btree get(K);
 	protected:
 		K key;
 		V val;
@@ -20,6 +23,9 @@ namespace tree {
 		Btree *bRlink;
 		Btree *bLlink;
 		int nodes = 0;
+		bool DEL = false;
+
+		Btree insert(Btree*);
 	};
 
 	template <typename K, typename V>
@@ -40,9 +46,48 @@ namespace tree {
 		balance = 0;
 	}
 
+	/************************************************
+	Description: inserts key and val into the tree
+	key: The value to key the node on.
+	val: Value associated with key.
+	************************************************/
 	template <typename K, typename V>
 	Btree<K, V> Btree<K, V>::insert(K key, V value) {
-		cout << "hello world";
+		if (this->root)
+		{
+			this->DEL = false; this->nodes++;
+			Btree<K, V> *newNode = new Btree<K, V>(key, value);
+			return this->insert(newNode);
+		}
 		return *this;
+	}
+
+	/************************************************
+	Description: Inserts key and value into the tree
+	node: The tree node to insert
+	************************************************/
+	template <typename K, typename V>
+	Btree<K, V> Btree<K, V>::insert(Btree *node) {
+		cout << "insert. ";
+		this->right = node;
+		return *this;
+	}
+
+	template<typename K, typename V>
+	Btree<K, V> Btree<K, V>::remove()
+	{
+		return this->right;
+	}
+
+	template<typename K, typename V>
+	Btree<K, V> Btree<K, V>::removeAt(K key)
+	{
+		return this->right;
+	}
+
+	template<typename K, typename V>
+	Btree<K, V> Btree<K, V>::get(K key)
+	{
+		return this->right;
 	}
 }
