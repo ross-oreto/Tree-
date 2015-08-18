@@ -2,6 +2,7 @@
 //
 #include <string>
 #include <iostream>
+#include <vector>
 #include "stdafx.h"
 #include "Btree.h"
 
@@ -9,12 +10,13 @@ using namespace tree;
 
 int main()
 {
-	Btree<int, string> btree = Btree<int, string>();
-	btree.insert(5, "5");
-	btree.insert(3, "3");
-	btree.insert(7, "7");
-	btree.insert(5, "5");
-	Btree<int, string>::Node *root = btree.getRoot();
+	//std::vector<double> v{ 4, 2, 0, 3, 3.5, 7, 20 };
+	std::vector<double> v{ 4, 2, 0 };
+	Btree<double, double> btree = Btree<double, double>();
+	for (auto &i : v) {
+		btree.insert(i, i);
+	}
+	Btree<double, double>::Node *root = btree.getRoot();
 	cout << std::string("Size: ").append(std::to_string(btree.size()));
     return 0;
 }

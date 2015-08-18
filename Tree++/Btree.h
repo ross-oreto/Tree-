@@ -14,11 +14,6 @@ namespace tree {
 	template <typename K, typename V>
 	class Btree {
 	public:
-		Btree();
-		bool isEmpty();
-		int size();
-		Btree insert(K, V);
-
 		class Node {
 		public:
 			Node(K key, V val);
@@ -34,6 +29,7 @@ namespace tree {
 			Node *right;
 			Node *bRlink;
 			Node *bLlink;
+			int balance;
 
 			bool hasNoChildren();
 			bool hasTwoChildren();
@@ -42,34 +38,50 @@ namespace tree {
 			bool isRightChild();
 			bool isLeftChild();
 			bool isRoot();
+			void replace(Node*);
 		private:
 			void attachLeftNode(Node*);
 			void attachRightNode(Node*);
 		};
 
+		Btree();
+		bool isEmpty();
+		int size();
+		Btree insert(K, V);
 		Node* getRoot();
 
 	protected:
-		int balance;
-		int nodes = 0;
 		bool DEL = false;
 		Node *root;
+		void inOrder(Node* node, int *count);
 	};
 
 	template <typename K, typename V>
 	Btree<K, V>::Btree() {
-		nodes = 0;
-		balance = 0;
-	}
-
-	template <typename K, typename V>
-	bool Btree<K, V>::isEmpty() {
-		return nodes == 0;
+		root = NULL;
 	}
 
 	template <typename K, typename V>
 	int Btree<K, V>::size() {
+		int nodes = 0;
+		if (!isEmpty()) {
+			inOrder(root, &nodes);
+		}
 		return nodes;
+	}
+
+	template <typename K, typename V>
+	bool Btree<K, V>::isEmpty() {
+		return root == NULL;
+	}
+
+	template <typename K, typename V>
+	void Btree<K, V>::inOrder(Node* node, int *nodes) {
+		if (node != NULL) {
+			inOrder(node->getLeft(), nodes);
+			*nodes += 1;
+			inOrder(node->getRight(), nodes);
+		}
 	}
 
 	/************************************************
@@ -87,25 +99,38 @@ namespace tree {
 		else {
 			root->insert(newNode);
 		}
-		this->nodes++;
 		return *this;
 	}
 
 	template <typename K, typename V>
 	int Btree<K, V>::Node::insert(Node *newNode) {
 		if (cmp<K>(newNode->getKey(), getKey()) < 0) {
-			cout << "go left\n";
 			if (getLeft() == NULL) {
+				cout << "attach left\n";
 				attachLeftNode(newNode);
+				return balance;
+			}
+			else {
+				cout << "go left\n";
+				balance -= abs(getLeft()->insert(newNode));
 			}
 		}
 		else if (cmp<K>(newNode->getKey(), getKey()) > 0) {
-			cout << "go right\n";
+			if (getRight() == NULL) {
+				cout << "attach right\n";
+				attachRightNode(newNode);
+				return balance;
+			}
+			else {
+				cout << "go right\n";
+				balance += abs(getRight()->insert(newNode));
+			}
 		}
 		else {
 			cout << "equal\n";
+			replace(newNode);
 		}
-		return 1;
+		return balance;
 	}
 
 	template <typename K, typename V>
@@ -113,6 +138,7 @@ namespace tree {
 		this->key = key;
 		this->val = val;
 		left = right = bRlink = bLlink = NULL;
+		balance = 0;
 	}
 
 	template <typename K, typename V>
@@ -134,12 +160,19 @@ namespace tree {
 	typename void Btree<K, V>::Node::attachLeftNode(Node *node) {
 		left = node;
 		node->bLlink = left;
+		balance -= 1;
 	}
 
 	template <typename K, typename V>
 	typename void Btree<K, V>::Node::attachRightNode(Node *node) {
 		right = node;
 		node->bRlink = right;
+		balance += 1;
+	}
+
+	template <typename K, typename V>
+	typename void Btree<K, V>::Node::replace(Node *node) {
+		val = node->val;
 	}
 
 	template <typename K, typename V>
