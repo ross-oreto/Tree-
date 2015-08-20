@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 namespace tree {
@@ -14,7 +15,7 @@ namespace tree {
 	template <typename K, typename V>
 	class Btree {
 	public:
-		class Node {
+		friend class Node {
 		public:
 			enum Type
 			{
@@ -26,7 +27,6 @@ namespace tree {
 			V getVal();
 			Node* getLeft();
 			Node* getRight();
-			int insert(Node*);
 			Node* getParent();
 			Type getType();
 			string toString();
@@ -40,8 +40,12 @@ namespace tree {
 			int balance;
 			Type type;
 
+			int insert(Node*);
+			Node* get(K);
+
 			bool hasNoChildren();
 			bool hasTwoChildren();
+			bool hasChild();
 			bool hasRightChild();
 			bool hasLeftChild();
 			bool isRightChild();
@@ -67,6 +71,9 @@ namespace tree {
 		int size();
 		Btree insert(K, V);
 		Node* getRoot();
+		Node* get(K);
+		V getVal(K);
+		bool contains(K);
 		void print();
 
 	protected:
@@ -143,7 +150,6 @@ namespace tree {
 	int Btree<K, V>::Node::insert(Node *newNode) {
 		if (cmp<K>(newNode->getKey(), getKey()) < 0) {
 			if (getLeft() == NULL) {
-				cout << "attach left " + std::to_string(newNode->getKey()).append("\n");
 				attachLeftNode(newNode);
 			}
 			else {
@@ -154,7 +160,6 @@ namespace tree {
 		}
 		else if (cmp<K>(newNode->getKey(), getKey()) > 0) {
 			if (getRight() == NULL) {
-				cout << "attach right " + std::to_string(newNode->getKey()).append("\n");
 				attachRightNode(newNode);
 			}
 			else {
@@ -164,12 +169,11 @@ namespace tree {
 			}
 		}
 		else {
-			cout << "equal\n";
 			replace(newNode);
+			return 0;
 		}
 		if (balance < -1) rotateRight()->balance; 
 		if (balance > 1) rotateLeft()->balance;
-		cout << "balance of " + std::to_string(key).append(": ").append(std::to_string(balance)).append("\n");
 		return balance;
 	}
 
@@ -187,8 +191,8 @@ namespace tree {
 			attachRightNode(node->detachLeftNode());
 		}
 		node->attachLeftNode(this);
+		if (abs(balance) < 2) node->balance = balance * -1;
 		setBalance();
-		cout << "rotate left on: " + std::to_string(key).append("\n");
 		return node;
 	}
 
@@ -204,10 +208,10 @@ namespace tree {
 		}
 		if (node->hasRightChild()) {
 			attachLeftNode(node->detachRightNode());
-		}
+		} 
 		node->attachRightNode(this);
+		if (abs(balance) < 2) node->balance = balance * -1;
 		setBalance();
-		cout << "rotate right on: " + std::to_string(key).append("\n");
 		return node;
 	}
 
@@ -230,7 +234,7 @@ namespace tree {
 	template <typename K, typename V>
 	string Btree<K, V>::Node::toString() {
 		string sep = ", ";
-		string s = std::to_string(key).append(sep).append("type: ");
+		string s = "[ "+std::to_string(key).append(sep).append("type: ");
 
 		switch (type)
 		{
@@ -243,8 +247,50 @@ namespace tree {
 		if (!isRoot()) {
 			s.append(sep).append("parent: ").append(std::to_string(getParent()->getKey()));
 		}
-		s.append(sep).append("balance: ").append(std::to_string(balance));
+		s.append(sep).append("balance: ").append(std::to_string(balance)).append(" ]");
 		return s;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::get(K key) {
+		Node *node = NULL;
+		if (!isEmpty()) node = root->get(key);
+		return node;
+	}
+
+	template <typename K, typename V>
+	V Btree<K, V>::getVal(K key) {
+		Node *node = get(key);
+		if (node == NULL) {
+			std::stringstream ostr;
+			ostr << "key not found exception: " << std::to_string(key);
+			throw(exception(ostr.str().c_str()));
+		}
+		return node->getVal();
+	}
+
+	template <typename K, typename V>
+	bool Btree<K, V>::contains(K key) {
+		Node *node = NULL;
+		bool contains = false;
+		if (!isEmpty()) node = root->get(key);
+		if (node != NULL) contains = true;
+		return contains;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::get(K key) {
+		Node *node = NULL;
+		if (cmp<K>(key, getKey()) < 0) {
+			if(hasLeftChild()) node = left->get(key);
+		}
+		else if (cmp<K>(key, getKey()) > 0) {
+			if (hasRightChild()) node = right->get(key);
+		}
+		else {
+			node = this;
+		}
+		return node;
 	}
 
 	template <typename K, typename V>
@@ -272,7 +318,9 @@ namespace tree {
 		left = node;
 		node->type = Type::LEFT;
 		node->parent = this;
-		if(addWeight) balance -= 1;
+		if (addWeight) {
+			balance -= 1;
+		}
 		return this;
 	}
 
@@ -281,7 +329,9 @@ namespace tree {
 		right = node;
 		node->type = Type::RIGHT;
 		node->parent = this;
-		if (addWeight) balance += 1;
+		if (addWeight) {
+			balance += 1;
+		}
 		return this;
 	}
 
@@ -352,6 +402,11 @@ namespace tree {
 	template <typename K, typename V>
 	typename bool Btree<K, V>::Node::hasTwoChildren() {
 		return right != NULL && left != NULL;
+	}
+
+	template <typename K, typename V>
+	typename bool Btree<K, V>::Node::hasChild() {
+		return right != NULL || left != NULL;
 	}
 
 	template <typename K, typename V>
