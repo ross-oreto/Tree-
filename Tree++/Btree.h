@@ -49,13 +49,16 @@ namespace tree {
 			bool isRoot();
 			bool hasParent();
 			void replace(Node*);
+			bool leansRight();
+			bool leansLeft();
 		private:
-			void attachLeftNode(Node*);
-			void attachRightNode(Node*);
+			Node* attachLeftNode(Node*, bool addWeight = true);
+			Node* attachRightNode(Node*, bool addWeight = true);
+			Node* attachNode(Node*, Type);
 			Node* detachLeftNode();
 			Node* detachRightNode();
-			void rotateLeft();
-			void rotateRight();
+			Node* rotateLeft();
+			Node* rotateRight();
 			void setBalance();
 		};
 
@@ -140,47 +143,72 @@ namespace tree {
 	int Btree<K, V>::Node::insert(Node *newNode) {
 		if (cmp<K>(newNode->getKey(), getKey()) < 0) {
 			if (getLeft() == NULL) {
-				cout << "attach left\n";
+				cout << "attach left " + std::to_string(newNode->getKey()).append("\n");
 				attachLeftNode(newNode);
 			}
 			else {
-				balance -= abs(getLeft()->insert(newNode));
+				int weight = abs(getLeft()->insert(newNode));
+				if (weight == 0) return weight;
+				balance = balance - weight;
 			}
 		}
 		else if (cmp<K>(newNode->getKey(), getKey()) > 0) {
 			if (getRight() == NULL) {
-				cout << "attach right\n";
+				cout << "attach right " + std::to_string(newNode->getKey()).append("\n");
 				attachRightNode(newNode);
 			}
 			else {
-				balance += abs(getRight()->insert(newNode));
+				int weight = abs(getRight()->insert(newNode));
+				if (weight == 0) return weight;
+				balance = balance + weight;
 			}
 		}
 		else {
 			cout << "equal\n";
 			replace(newNode);
 		}
-		if (balance < -1) rotateRight();
-		if (balance > 1) rotateLeft();
+		if (balance < -1) rotateRight()->balance; 
+		if (balance > 1) rotateLeft()->balance;
+		cout << "balance of " + std::to_string(key).append(": ").append(std::to_string(balance)).append("\n");
 		return balance;
 	}
 
 	template <typename K, typename V>
-	void Btree<K, V>::Node::rotateLeft() {
-		cout << "rotate left\n";
+	typename Btree<K, V>::Node* Btree<K, V>::Node::rotateLeft() {
 		Node *node = detachRightNode();
-		node->type = type;
+		if (node->leansLeft()) {
+			node = node->rotateRight();
+		}
+		if (isRoot()) node->type = Type::ROOT;
+		else if(hasParent()){
+			parent->attachNode(node, type);
+		}
+		if (node->hasLeftChild()) {
+			attachRightNode(node->detachLeftNode());
+		}
 		node->attachLeftNode(this);
 		setBalance();
+		cout << "rotate left on: " + std::to_string(key).append("\n");
+		return node;
 	}
 
 	template <typename K, typename V>
-	void Btree<K, V>::Node::rotateRight() {
-		cout << "rotate right\n";
+	typename Btree<K, V>::Node* Btree<K, V>::Node::rotateRight() {
 		Node *node = detachLeftNode();
-		node->type = type;
+		if (node->leansRight()) {
+			node = node->rotateLeft();
+		}
+		if (isRoot()) node->type = Type::ROOT;
+		else if (hasParent()) {
+			parent->attachNode(node, type);
+		}
+		if (node->hasRightChild()) {
+			attachLeftNode(node->detachRightNode());
+		}
 		node->attachRightNode(this);
 		setBalance();
+		cout << "rotate right on: " + std::to_string(key).append("\n");
+		return node;
 	}
 
 	template <typename K, typename V>
@@ -240,19 +268,37 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
-	typename void Btree<K, V>::Node::attachLeftNode(Node *node) {
+	typename Btree<K, V>::Node* Btree<K, V>::Node::attachLeftNode(Node *node, bool addWeight) {
 		left = node;
 		node->type = Type::LEFT;
 		node->parent = this;
-		balance -= 1;
+		if(addWeight) balance -= 1;
+		return this;
 	}
 
 	template <typename K, typename V>
-	typename void Btree<K, V>::Node::attachRightNode(Node *node) {
+	typename Btree<K, V>::Node* Btree<K, V>::Node::attachRightNode(Node *node, bool addWeight) {
 		right = node;
 		node->type = Type::RIGHT;
 		node->parent = this;
-		balance += 1;
+		if (addWeight) balance += 1;
+		return this;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::attachNode(Node *node, Type type) {
+		switch (type)
+		{
+		case Type::LEFT:
+			attachLeftNode(node, false);
+			break;
+		case Type::RIGHT:
+			attachRightNode(node, false);
+			break;
+		default:
+			break;
+		}
+		return this;
 	}
 
 	template <typename K, typename V>
@@ -336,5 +382,15 @@ namespace tree {
 	template <typename K, typename V>
 	typename bool Btree<K, V>::Node::isRoot() {
 		return type == Type::ROOT;
+	}
+
+	template <typename K, typename V>
+	typename bool Btree<K, V>::Node::leansLeft() {
+		return balance < 0;
+	}
+
+	template <typename K, typename V>
+	typename bool Btree<K, V>::Node::leansRight() {
+		return balance > 0;
 	}
 }
