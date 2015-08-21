@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 namespace tree {
@@ -15,19 +16,15 @@ namespace tree {
 	template <typename K, typename V>
 	class Btree {
 	public:
-		friend class Node {
+		class Node {
 		public:
 			enum Type
 			{
 				ROOT, LEFT, RIGHT
 			};
 
-			Node(K key, V val);
 			K getKey();
 			V getVal();
-			Node* getLeft();
-			Node* getRight();
-			Node* getParent();
 			Type getType();
 			string toString();
 
@@ -40,8 +37,12 @@ namespace tree {
 			int balance;
 			Type type;
 
+			Node(K key, V val);
 			int insert(Node*);
 			Node* get(K);
+			Node* getLeft();
+			Node* getRight();
+			Node* getParent();
 
 			bool hasNoChildren();
 			bool hasTwoChildren();
@@ -64,6 +65,7 @@ namespace tree {
 			Node* rotateLeft();
 			Node* rotateRight();
 			void setBalance();
+			friend class Btree;
 		};
 
 		Btree();
@@ -74,6 +76,7 @@ namespace tree {
 		Node* get(K);
 		V getVal(K);
 		bool contains(K);
+		bool containsAll(vector<K>);
 		void print();
 
 	protected:
@@ -276,6 +279,18 @@ namespace tree {
 		if (!isEmpty()) node = root->get(key);
 		if (node != NULL) contains = true;
 		return contains;
+	}
+
+	template <typename K, typename V>
+	bool Btree<K, V>::containsAll(vector<K> keys) {
+		bool all = true;
+		for (auto &key : keys) {
+			if (!contains(key)) {
+				all = false;
+				break;
+			}
+		}
+		return all;
 	}
 
 	template <typename K, typename V>
