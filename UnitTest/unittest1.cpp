@@ -41,7 +41,7 @@ namespace UnitTest
 		TEST_METHOD(TestTree)
 		{
 			btree = insertInts({ 0, 2, 5, 10, 15, 20, 12, 14, 13, 25, 0, 2, 5, 10, 15, 20, 12, 14, 13, 25 });
-			Assert::AreEqual(btree.size(), 9);
+			Assert::AreEqual(btree.size(), 10);
 		}
 		TEST_METHOD(TestTreeRandom)
 		{
