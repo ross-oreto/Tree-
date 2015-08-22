@@ -6,7 +6,18 @@ using namespace tree;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTest
-{		
+{
+	int calcuateDepth(int size) {
+		int t = 0;
+		if (size > 0) {
+			t = 1;
+			while ((size = (size / 2)) >= 1) {
+				t++;
+			}
+		}
+		return t;
+	}
+
 	Btree<int, int> insertInts(std::vector<int> v) {
 		Btree<int, int> btree = Btree<int, int>();
 		for (auto &i : v) {
@@ -14,6 +25,20 @@ namespace UnitTest
 		}
 		return btree;
 	}
+
+	Btree<int, int> insertRandom(int size, int max) {
+		std::vector<int> v;
+		for (int i = 0; i < size; i++) {
+			int r = rand() % max;
+			v.push_back(r);
+		}
+		return insertInts(v);
+	}
+
+	Btree<int, int> insertRandom() {
+		return insertRandom(rand() % 1000, 100000);
+	}
+
 	Btree<int, int> btree;
 
 	TEST_CLASS(UnitTest1)
@@ -21,18 +46,18 @@ namespace UnitTest
 	public:
 		TEST_CLASS_INITIALIZE(init)
 		{
-			btree = insertInts({ 10, 4, 7 });
+			srand(time(NULL));
 		}
 		TEST_METHOD(TestTreeSimple)
 		{
-			Assert::AreEqual(btree.size(), 3);
+			btree = insertInts({ 10, 4, 7 });
+			Assert::AreEqual(3, btree.size());
 			Assert::IsNotNull(btree.get(4));
 			Assert::IsNull(btree.get(44));
 			Assert::IsTrue(btree.contains(7));
 			Assert::IsFalse(btree.contains(77));
 			Assert::IsTrue(btree.containsAll({ 10, 4, 7 }));
-			Assert::AreEqual(btree.getVal(10), 10);
-			wchar_t message[200];
+			Assert::AreEqual(10, btree.getVal(10));
 			Assert::ExpectException<exception>([&]
 			{
 				btree.getVal(1);
@@ -41,19 +66,34 @@ namespace UnitTest
 		TEST_METHOD(TestTree)
 		{
 			btree = insertInts({ 0, 2, 5, 10, 15, 20, 12, 14, 13, 25, 0, 2, 5, 10, 15, 20, 12, 14, 13, 25 });
-			Assert::AreEqual(btree.size(), 10);
+			Assert::AreEqual(10, btree.size());
 		}
-		TEST_METHOD(TestTreeRandom)
+		TEST_METHOD(TestTreeDepth)
 		{
-			std::vector<int> v;
-			/* initialize random seed: */
-			srand(time(NULL));
-			for (int i = 0; i < 1000; i++) {
-				int r = rand() % 2000;
-				v.push_back(r);
+			btree = insertRandom();
+			Assert::IsTrue(btree.depth() >= calcuateDepth(btree.size()));
+		}
+		TEST_METHOD(TestTreeIterate)
+		{
+			btree = insertInts({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+			Btree<int, int>::Node *beginning = btree.beginning();
+			Btree<int, int>::Node *end = btree.end();
+			Assert::AreEqual(0, beginning->getVal());
+			Assert::AreEqual(10, end->getVal());
+			Btree<int, int>::Node *ptr = beginning;
+			int i = 0;
+			while (i <= 10) {
+				Assert::AreEqual(i, ptr->getVal());
+				ptr = ptr->next();
+				i++;
 			}
-			btree = insertInts(v);
-			Assert::IsFalse(btree.isEmpty());
+			i = 10;
+			ptr = end;
+			while (i >= 0) {
+				Assert::AreEqual(i, ptr->getVal());
+				ptr = ptr->previous();
+				i--;
+			}
 		}
 	};
 }

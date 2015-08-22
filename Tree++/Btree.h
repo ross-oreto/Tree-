@@ -27,6 +27,8 @@ namespace tree {
 			V getVal();
 			Type getType();
 			string toString();
+			Node* next();
+			Node* previous();
 
 		protected:
 			K key;
@@ -56,6 +58,9 @@ namespace tree {
 			void replace(Node*);
 			bool leansRight();
 			bool leansLeft();
+
+			Node* beginning();
+			Node* end();
 		private:
 			Node* attachLeftNode(Node*, bool addWeight = true);
 			Node* attachRightNode(Node*, bool addWeight = true);
@@ -71,8 +76,11 @@ namespace tree {
 		Btree();
 		bool isEmpty();
 		int size();
+		int depth();
 		Btree insert(K, V);
 		Node* getRoot();
+		Node* beginning();
+		Node* end();
 		Node* get(K);
 		V getVal(K);
 		bool contains(K);
@@ -83,6 +91,7 @@ namespace tree {
 		bool DEL = false;
 		Node *root;
 		void count(Node* node, int *count);
+		void count_depth(Node* node, int *depth, int *high);
 		void print(Node* node);
 	};
 
@@ -101,6 +110,20 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
+	int Btree<K, V>::depth() {
+		int depth = 0;
+		int high = 0;
+		if (!isEmpty()) {
+			depth = high = 1;
+			if(root->balance <= 0)
+				count_depth(root->left, &depth, &high);
+			else 
+				count_depth(root->right, &depth, &high);
+		}
+		return high;
+	}
+
+	template <typename K, typename V>
 	bool Btree<K, V>::isEmpty() {
 		return root == NULL;
 	}
@@ -111,6 +134,17 @@ namespace tree {
 			count(node->getLeft(), nodes);
 			*nodes += 1;
 			count(node->getRight(), nodes);
+		}
+	}
+
+	template <typename K, typename V>
+	void Btree<K, V>::count_depth(Node* node, int *depth, int *high) {
+		if (node != NULL) {
+			*depth += 1;
+			count_depth(node->getLeft(), depth, high);
+			count_depth(node->getRight(), depth, high);
+			if (*depth > *high) *high = *depth;
+			*depth -= 1;
 		}
 	}
 
@@ -314,6 +348,18 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::beginning() {
+		if (isEmpty()) return NULL;
+		return root->beginning();
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::end() {
+		if (isEmpty()) return NULL;
+		return root->end();
+	}
+
+	template <typename K, typename V>
 	typename V Btree<K, V>::Node::getVal() {
 		return val;
 	}
@@ -326,6 +372,62 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node::Type Btree<K, V>::Node::getType() {
 		return type;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::next() {
+		Node *next = NULL;
+		if (hasRightChild()) {
+			next = right->beginning();
+		}
+		else if (hasParent()) {
+			Node* node = this;
+			while (node->parent != NULL) {
+				node = node->parent;
+				if (cmp(node->val, val) > 0) {
+					next = node;
+					break;
+				}
+			}
+		}
+		return next;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::beginning() {
+		Node *beginning = this;
+		while (beginning->left != NULL) {
+			beginning = beginning->left;
+		}
+		return beginning;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::end() {
+		Node *end = this;
+		while (end->right != NULL) {
+			end = end->right;
+		}
+		return end;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::previous() {
+		Node *last = NULL;
+		if (hasLeftChild()) {
+			last = left->end();
+		}
+		else if (hasParent()) {
+			Node* node = this;
+			while (node->parent != NULL) {
+				node = node->parent;
+				if (cmp(node->val, val) < 0) {
+					last = node;
+					break;
+				}
+			}
+		}
+		return last;
 	}
 
 	template <typename K, typename V>

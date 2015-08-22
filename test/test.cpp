@@ -14,7 +14,6 @@ using namespace tree;
 int main()
 {
 	_set_error_mode(_OUT_TO_MSGBOX);
-	std::map<char, int>::iterator i;
 	try {
 
 	}
