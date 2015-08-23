@@ -95,5 +95,25 @@ namespace UnitTest
 				i--;
 			}
 		}
+		TEST_METHOD(TestTreeClear)
+		{
+			btree = insertRandom();
+			btree.clear();
+			Assert::AreEqual(0, btree.size());
+			Assert::IsTrue(btree.isEmpty());
+			Assert::IsNull(btree.beginning());
+			Assert::IsNull(btree.end());
+		}
+		TEST_METHOD(TestTreeDelete)
+		{
+			btree = btree = insertInts({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+			//while (!btree.isEmpty()) {
+			//	btree.getRoot()->remove();
+			//}
+			Assert::AreEqual(0, btree.size());
+			Assert::IsTrue(btree.isEmpty());
+			Assert::IsNull(btree.beginning());
+			Assert::IsNull(btree.end());
+		}
 	};
 }

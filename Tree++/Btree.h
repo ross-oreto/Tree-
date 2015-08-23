@@ -29,6 +29,7 @@ namespace tree {
 			string toString();
 			Node* next();
 			Node* previous();
+			Node* remove();
 
 		protected:
 			K key;
@@ -86,9 +87,9 @@ namespace tree {
 		bool contains(K);
 		bool containsAll(vector<K>);
 		void print();
+		void clear();
 
 	protected:
-		bool DEL = false;
 		Node *root;
 		void count(Node* node, int *count);
 		void count_depth(Node* node, int *depth, int *high);
@@ -154,6 +155,11 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
+	void Btree<K, V>::clear() {
+		
+	}
+
+	template <typename K, typename V>
 	void Btree<K, V>::print(Node* node) {
 		if (node != NULL) {
 			print(node->getLeft());
@@ -169,7 +175,6 @@ namespace tree {
 	************************************************/
 	template <typename K, typename V>
 	Btree<K, V> Btree<K, V>::insert(K key, V value) {
-		this->DEL = false;
 		Btree<K, V>::Node *newNode = new Node(key, value);
 		if (isEmpty()) {
 			this->root = newNode;
@@ -428,6 +433,11 @@ namespace tree {
 			}
 		}
 		return last;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::remove() {
+		return this;
 	}
 
 	template <typename K, typename V>
