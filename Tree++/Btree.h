@@ -29,7 +29,6 @@ namespace tree {
 			string toString();
 			Node* next();
 			Node* previous();
-			Node* remove();
 
 		protected:
 			K key;
@@ -47,6 +46,7 @@ namespace tree {
 			Node* getRight();
 			Node* getParent();
 
+			void init();
 			bool hasNoChildren();
 			bool hasTwoChildren();
 			bool hasChild();
@@ -62,12 +62,14 @@ namespace tree {
 
 			Node* beginning();
 			Node* end();
+			Node* remove();
 		private:
 			Node* attachLeftNode(Node*, bool addWeight = true);
 			Node* attachRightNode(Node*, bool addWeight = true);
 			Node* attachNode(Node*, Type);
 			Node* detachLeftNode();
 			Node* detachRightNode();
+			Node* detachNode(Type);
 			Node* rotateLeft();
 			Node* rotateRight();
 			void setBalance();
@@ -83,6 +85,7 @@ namespace tree {
 		Node* beginning();
 		Node* end();
 		Node* get(K);
+		Node* remove(K);
 		V getVal(K);
 		bool contains(K);
 		bool containsAll(vector<K>);
@@ -91,13 +94,20 @@ namespace tree {
 
 	protected:
 		Node *root;
+		void init();
 		void count(Node* node, int *count);
 		void count_depth(Node* node, int *depth, int *high);
 		void print(Node* node);
+		void detatchAll(Node* node);
 	};
 
 	template <typename K, typename V>
 	Btree<K, V>::Btree() {
+		init();
+	}
+
+	template <typename K, typename V>
+	void Btree<K, V>::init() {
 		root = NULL;
 	}
 
@@ -156,7 +166,34 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::clear() {
-		
+		if (!isEmpty()) {
+			detatchAll(root);
+			init();
+		}
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::remove(K key) {
+		Node* node = get(key);
+		if (node != NULL) {
+			if (node->isRoot()) {
+				node->init();
+				init();
+			}
+			else {
+				node->remove();
+			}
+		}
+		return node;
+	}
+
+	template <typename K, typename V>
+	void Btree<K, V>::detatchAll(Node* node) {
+		if (node != NULL) {
+			detatchAll(node->getLeft());
+			detatchAll(node->getRight());
+			init();
+		}
 	}
 
 	template <typename K, typename V>
@@ -266,9 +303,16 @@ namespace tree {
 
 	template <typename K, typename V>
 	Btree<K, V>::Node::Node(K key, V val) {
+		init();
 		this->key = key;
 		this->val = val;
-		left = right = parent = NULL;
+	}
+
+	template <typename K, typename V>
+	void Btree<K, V>::Node::init() {
+		left = NULL;
+		right = NULL;
+		parent = NULL;
 		type = Type::ROOT;
 		balance = 0;
 	}
@@ -437,7 +481,17 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::remove() {
-		return this;
+		Node *node = NULL;
+		if (hasNoChildren()) {
+			node = parent->detachNode(type);
+			node->init();
+		}
+		else {
+			Node *node = left;
+			node = right;
+			cout << "TEST";
+		}
+		return node;
 	}
 
 	template <typename K, typename V>
@@ -498,6 +552,14 @@ namespace tree {
 			right = NULL;
 			node->parent = NULL;
 		}
+		return node;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::detachNode(Type type) {
+		Node *node = NULL;
+		if (type == Type::LEFT) node = detachLeftNode();
+		else if (type == Type::RIGHT) node = detachRightNode();
 		return node;
 	}
 

@@ -106,14 +106,18 @@ namespace UnitTest
 		}
 		TEST_METHOD(TestTreeDelete)
 		{
-			btree = btree = insertInts({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+			btree = btree = insertInts({ 0, 2, 5, 10, 15, 20, 12, 14, 13, 25 });
+			Btree<int, int>::Node *node = btree.remove(25);
+			Assert::IsNotNull(node);
+			Assert::AreEqual(node->getVal(), 25);
+			Assert::AreEqual(btree.size(), 9);
 			//while (!btree.isEmpty()) {
-			//	btree.getRoot()->remove();
+			//	btree.remove(10);
 			//}
-			Assert::AreEqual(0, btree.size());
-			Assert::IsTrue(btree.isEmpty());
-			Assert::IsNull(btree.beginning());
-			Assert::IsNull(btree.end());
+			//Assert::AreEqual(0, btree.size());
+			//Assert::IsTrue(btree.isEmpty());
+			//Assert::IsNull(btree.beginning());
+			//Assert::IsNull(btree.end());
 		}
 	};
 }
