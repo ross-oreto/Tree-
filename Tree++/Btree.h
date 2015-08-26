@@ -73,6 +73,7 @@ namespace tree {
 			Node* rotateLeft();
 			Node* rotateRight();
 			void setBalance();
+			Node* notifyParents(Node*);
 			friend class Btree;
 		};
 
@@ -85,7 +86,10 @@ namespace tree {
 		Node* beginning();
 		Node* end();
 		Node* get(K);
+		Node* remove(Node*);
 		Node* remove(K);
+		Node* pop();
+		Node* pull();
 		V getVal(K);
 		bool contains(K);
 		bool containsAll(vector<K>);
@@ -173,15 +177,29 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
-	typename Btree<K, V>::Node* Btree<K, V>::remove(K key) {
-		Node* node = get(key);
+	typename Btree<K, V>::Node* Btree<K, V>::remove(Node* node) {
 		if (node != NULL) {
-			node->remove();
-			if (node->isRoot()) {
-				// TODO: re assign the root
+			Node *newNode = node->remove();
+			if ((newNode != NULL && newNode->isRoot()) || node->isRoot()) {
+				root = newNode;
 			}
 		}
 		return node;
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::remove(K key) {
+		return remove(get(key));
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::pop() {
+		return remove(end());
+	}
+
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::pull() {
+		return remove(beginning());
 	}
 
 	template <typename K, typename V>
@@ -479,54 +497,82 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::remove() {
 		Node *node = parent;
-		Type nodeType = type;
+		Node *replace = NULL;
 		if (node == NULL) {
-			// TODO: this is the root
-			if (hasChild()) detachNode(type);
-			init();
+			replace = previous();
+			if (replace == NULL) replace = next();
+			if (replace != NULL) {
+				Node *replaceParent = replace->parent;
+				replace->attachLeftNode(detachLeftNode(), false);
+				replace->attachRightNode(detachRightNode(), false);
+				replace->type = Type::ROOT;
+				if (replace->right == replace) replace->right = NULL;
+				if (replace->left == replace) replace->left = NULL;
+				node = replaceParent;
+			}
 		}
-		if (hasTwoChildren()) {
-			// TODO: case is more complex
+		else if (hasTwoChildren()) {
+			node->detachNode(type);
+			replace = previous();
+			Node *previousParent = replace->parent;
+			node->attachNode(previousParent->detachNode(replace->type), type);
+			replace->attachLeftNode(detachLeftNode(), false);
+			replace->attachRightNode(detachRightNode(), false);
+			node = previousParent;
 		}
 		else if (hasNoChildren()) {
-			node->detachNode(type)->init();
+			node->detachNode(type);
 		}
 		else if (hasLeftChild()) {
 			node->detachNode(type);
-			node->attachNode(detachLeftNode(), type);
-			init();
+			replace = detachLeftNode();
+			node->attachNode(replace, type);
 		}
 		else {
 			node->detachNode(type);
-			node->attachNode(detachRightNode(), type);
-			init();
+			replace = detachRightNode();
+			node->attachNode(replace, type);
 		}
-		// TODO: refactor this into notifyParents(node) method.
-		while (node != NULL) {
-			if (nodeType == Type::LEFT) balance += 1;
-			else if (nodeType == Type::RIGHT) balance -= 1;
+		init();
+		Node *newRoot = notifyParents(node);
+		if (newRoot != NULL) replace = newRoot;
+		return replace;
+	}
 
-			if (balance < -1) {
-				rotateRight();
-				node = node->parent;
+	template <typename K, typename V>
+	typename Btree<K, V>::Node* Btree<K, V>::Node::notifyParents(Node* node) {
+		Type nodeType = type;
+		while (node != NULL) {
+			if (nodeType == Type::LEFT) node->balance += 1;
+			else if (nodeType == Type::RIGHT) node->balance -= 1;
+
+			if (node->balance < -1) {
+				node = node->rotateRight();
+				if (node->type == Type::ROOT) {
+					return node;
+				}
 			}
-			if (balance > 1) {
-				rotateLeft();
-				node = node->parent;
+			if (node->balance > 1) {
+				node = node->rotateLeft();
+				if (node->type == Type::ROOT) {
+					return node;
+				}
 			}
 			nodeType = node->type;
-			node = balance == 0 ? node->parent : NULL;
+			node = node->balance == 0 ? node->parent : NULL;
 		}
-		return this;
+		return NULL;
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::attachLeftNode(Node *node, bool addWeight) {
 		left = node;
-		node->type = Type::LEFT;
-		node->parent = this;
-		if (addWeight) {
-			balance -= 1;
+		if (node != NULL) {
+			node->type = Type::LEFT;
+			node->parent = this;
+			if (addWeight) {
+				balance -= 1;
+			}
 		}
 		return this;
 	}
@@ -534,10 +580,12 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::attachRightNode(Node *node, bool addWeight) {
 		right = node;
-		node->type = Type::RIGHT;
-		node->parent = this;
-		if (addWeight) {
-			balance += 1;
+		if (node != NULL) {
+			node->type = Type::RIGHT;
+			node->parent = this;
+			if (addWeight) {
+				balance += 1;
+			}
 		}
 		return this;
 	}

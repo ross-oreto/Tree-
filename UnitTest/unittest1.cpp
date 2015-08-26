@@ -104,24 +104,52 @@ namespace UnitTest
 			Assert::IsNull(btree.beginning());
 			Assert::IsNull(btree.end());
 		}
-		TEST_METHOD(TestTreeDelete)
+		TEST_METHOD(TestTreeRemove)
 		{
-			//std::vector<int> v = { 0, 1, 2, 3 };
-			std::vector<int> v = { 0, 1 };
+			std::vector<int> v = { 0, 1, 2, 3 };
 			btree = insertInts(v);
-			for (auto &i : v) {
+			Btree<int, int>::Node *node = btree.remove(0);
+			Assert::AreEqual(0, node->getVal());
+			Assert::AreEqual(2, btree.getRoot()->getVal());
+
+			node = btree.remove(1);
+			Assert::AreEqual(1, node->getVal());
+			Assert::AreEqual(2, btree.getRoot()->getVal());
+
+			node = btree.remove(2);
+			Assert::AreEqual(2, node->getVal());
+			Assert::AreEqual(3, btree.getRoot()->getVal());
+
+			node = btree.remove(3);
+			Assert::AreEqual(3, node->getVal());
+			Assert::IsNull(btree.getRoot());
+
+			btree = insertInts(v);
+
+			for (int i = v.size() - 1; i >= 0; i--) {
 				Btree<int, int>::Node *node = btree.remove(i);
 				Assert::IsNotNull(node);
 				Assert::AreEqual(i, node->getVal());
 			}
 			Assert::AreEqual(0, btree.size());
-			//while (!btree.isEmpty()) {
-			//	btree.remove(10);
-			//}
-			//Assert::AreEqual(0, btree.size());
-			//Assert::IsTrue(btree.isEmpty());
-			//Assert::IsNull(btree.beginning());
-			//Assert::IsNull(btree.end());
+		}
+		TEST_METHOD(TestTreePopPull)
+		{
+			btree = insertRandom();
+			while (!btree.isEmpty()) {
+				btree.pop();
+			}
+			Assert::AreEqual(0, btree.size());
+			Assert::IsNull(btree.beginning());
+			Assert::IsNull(btree.end());
+
+			btree = insertRandom();
+			while (!btree.isEmpty()) {
+				btree.pull();
+			}
+			Assert::AreEqual(0, btree.size());
+			Assert::IsNull(btree.beginning());
+			Assert::IsNull(btree.end());
 		}
 	};
 }
