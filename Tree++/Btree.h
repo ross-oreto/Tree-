@@ -176,12 +176,9 @@ namespace tree {
 	typename Btree<K, V>::Node* Btree<K, V>::remove(K key) {
 		Node* node = get(key);
 		if (node != NULL) {
+			node->remove();
 			if (node->isRoot()) {
-				node->init();
-				init();
-			}
-			else {
-				node->remove();
+				// TODO: re assign the root
 			}
 		}
 		return node;
@@ -251,8 +248,8 @@ namespace tree {
 			replace(newNode);
 			return 0;
 		}
-		if (balance < -1) rotateRight()->balance; 
-		if (balance > 1) rotateLeft()->balance;
+		if (balance < -1) rotateRight(); 
+		if (balance > 1) rotateLeft();
 		return balance;
 	}
 
@@ -304,6 +301,7 @@ namespace tree {
 	template <typename K, typename V>
 	Btree<K, V>::Node::Node(K key, V val) {
 		init();
+		type = Type::ROOT;
 		this->key = key;
 		this->val = val;
 	}
@@ -313,7 +311,6 @@ namespace tree {
 		left = NULL;
 		right = NULL;
 		parent = NULL;
-		type = Type::ROOT;
 		balance = 0;
 	}
 
@@ -481,17 +478,46 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::remove() {
-		Node *node = NULL;
-		if (hasNoChildren()) {
-			node = parent->detachNode(type);
-			node->init();
+		Node *node = parent;
+		Type nodeType = type;
+		if (node == NULL) {
+			// TODO: this is the root
+			if (hasChild()) detachNode(type);
+			init();
+		}
+		if (hasTwoChildren()) {
+			// TODO: case is more complex
+		}
+		else if (hasNoChildren()) {
+			node->detachNode(type)->init();
+		}
+		else if (hasLeftChild()) {
+			node->detachNode(type);
+			node->attachNode(detachLeftNode(), type);
+			init();
 		}
 		else {
-			Node *node = left;
-			node = right;
-			cout << "TEST";
+			node->detachNode(type);
+			node->attachNode(detachRightNode(), type);
+			init();
 		}
-		return node;
+		// TODO: refactor this into notifyParents(node) method.
+		while (node != NULL) {
+			if (nodeType == Type::LEFT) balance += 1;
+			else if (nodeType == Type::RIGHT) balance -= 1;
+
+			if (balance < -1) {
+				rotateRight();
+				node = node->parent;
+			}
+			if (balance > 1) {
+				rotateLeft();
+				node = node->parent;
+			}
+			nodeType = node->type;
+			node = balance == 0 ? node->parent : NULL;
+		}
+		return this;
 	}
 
 	template <typename K, typename V>
