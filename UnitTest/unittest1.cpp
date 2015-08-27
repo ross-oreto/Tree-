@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "Btree.h"
 #include <time.h>
+#include <map>
 using namespace tree;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -26,20 +27,41 @@ namespace UnitTest
 		return btree;
 	}
 
-	Btree<int, int> insertRandom(int size, int max) {
+	map<int, int> mapInsertInts(std::vector<int> v) {
+		map<int, int> rbtree = map<int, int>();
+		for (auto &i : v) {
+			rbtree.insert(std::pair<int, int>(i, i));
+		}
+		return rbtree;
+	}
+
+	vector<int> randomInts(int size, int max) {
 		std::vector<int> v;
 		for (int i = 0; i < size; i++) {
 			int r = rand() % max;
 			v.push_back(r);
 		}
-		return insertInts(v);
+		return v;
+	}
+
+	Btree<int, int> insertRandom(int size, int max) {
+		return insertInts(randomInts(size, max));
+	}
+
+	map<int, int> mapInsertRandom(int size, int max) {
+		return mapInsertInts(randomInts(size, max));
 	}
 
 	Btree<int, int> insertRandom() {
 		return insertRandom(rand() % 1000, 100000);
 	}
 
+	map<int, int> mapInsertRandom() {
+		return mapInsertRandom(rand() % 1000, 100000);
+	}
+
 	Btree<int, int> btree;
+	map<int, int> rbtree;
 
 	TEST_CLASS(UnitTest1)
 	{
@@ -150,6 +172,16 @@ namespace UnitTest
 			Assert::AreEqual(0, btree.size());
 			Assert::IsNull(btree.beginning());
 			Assert::IsNull(btree.end());
+		}
+		TEST_METHOD(vsRbTree)
+		{
+			rbtree = mapInsertRandom();
+			Assert::IsTrue(rbtree.size() > 0);
+		}
+		TEST_METHOD(vsbTree)
+		{
+			btree = insertRandom();
+			Assert::IsTrue(btree.size() > 0);
 		}
 	};
 }
