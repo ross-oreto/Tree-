@@ -45,6 +45,34 @@ void example() {
 	btree.clear();
 }
 
+class ex1 {
+public:
+	string name;
+	ex1() {
+
+	}
+	ex1(string s) {
+		name = s;
+	}
+	friend bool operator<(const ex1& l, const ex1& r) {
+		return l.name < r.name;
+	}
+	friend bool operator>(const ex1& l, const ex1& r) {
+		return l.name > r.name;
+	}
+	friend std::ostream& operator<<(std::ostream& os, ex1& obj) {
+		os << obj.name;
+		return os;
+	}
+};
+
+void example2() {
+	// create
+	Btree<ex1, string> btree = Btree<ex1, string>();
+	btree.insert(ex1("a"), "val1").insert(ex1("b"), "val2");
+	btree.print();
+}
+
 map<int, int> mapInsertInts(std::vector<int> v) {
 	map<int, int> rbtree = map<int, int>();
 	for (auto &i : v) {
@@ -105,7 +133,7 @@ double benchmark(std::function<void (int, int)> func, int size, int max) {
 }
 
 void benchmarkInserts() {
-	int size = 6000;
+	int size = 20000;
 	int max = 10000000;
 	double total_time_ticks1 = benchmark(&mapRunOps, size, max);
 	double total_time_ticks2 = benchmark(&runOps, size, max);

@@ -17,6 +17,24 @@ namespace tree {
 	class Btree {
 	public:
 		class Node {
+			friend std::ostream& operator<<(std::ostream& os, Node& obj) {
+				string sep = ", ";
+				os << "[ " << obj.key << sep << "type: ";
+				switch (obj.type)
+				{
+				case Type::LEFT: os << "left child"; break;
+				case Type::RIGHT: os << "right child"; break;
+				case Type::ROOT: os << "root"; break;
+				default:
+					break;
+				}
+				if (!obj.isRoot()) {
+					os << sep << "parent: " << obj.parent->key;
+				}
+				os << sep << "val: " << obj.val;
+				os << sep << "balance: " << obj.balance << " ]";
+				return os;
+			}
 		public:
 			enum Type
 			{
@@ -26,7 +44,6 @@ namespace tree {
 			K getKey();
 			V getVal();
 			Type getType();
-			string toString();
 			Node* next();
 			Node* previous();
 
@@ -221,7 +238,7 @@ namespace tree {
 	void Btree<K, V>::print(Node* node) {
 		if (node != NULL) {
 			print(node->left);
-			cout << node->toString().append("\n");
+			cout << *node << endl;
 			print(node->right);
 		}
 	}
@@ -340,26 +357,6 @@ namespace tree {
 		right = NULL;
 		parent = NULL;
 		balance = 0;
-	}
-
-	template <typename K, typename V>
-	string Btree<K, V>::Node::toString() {
-		string sep = ", ";
-		string s = "[ "+std::to_string(key).append(sep).append("type: ");
-
-		switch (type)
-		{
-		case Type::LEFT: s.append("left child"); break;
-		case Type::RIGHT: s.append("right child"); break;
-		case Type::ROOT: s.append("root"); break;
-		default:
-			break;
-		}
-		if (!isRoot()) {
-			s.append(sep).append("parent: ").append(std::to_string(parent->key));
-		}
-		s.append(sep).append("balance: ").append(std::to_string(balance)).append(" ]");
-		return s;
 	}
 
 	template <typename K, typename V>

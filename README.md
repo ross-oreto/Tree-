@@ -27,6 +27,35 @@
 	// clear tree
 	btree.clear();
 
+	// keying on a class requires overloading the <, >, and << operators, for example:
+	// also a class used as the value will need to overload the << operator
+	class ex1 {
+		public:
+		string name;
+		ex1() {
+
+		}
+		ex1(string s) {
+			name = s;
+		}
+		friend bool operator<(const ex1& l, const ex1& r) {
+			return l.name < r.name;
+		}
+		friend bool operator>(const ex1& l, const ex1& r) {
+			return l.name > r.name;
+		}
+		friend std::ostream& operator<<(std::ostream& os, ex1& obj) {
+			os << obj.name;
+			return os;
+		}
+	};
+
+	// now we can create and insert as normal
+	Btree<ex1, string> btree = Btree<ex1, string>();
+	btree.insert(ex1("a"), "val1").insert(ex1("b"), "val2");
+	btree.print();
+
+
 ### VS 2015 setup
 * After checking out and opening the project in VS, right click on the test projects and choose properites.
 * Under C/C++ -> General, edit the "Additional Include Directories" path and select the Tree++ project directory.
