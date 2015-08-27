@@ -40,6 +40,7 @@ namespace tree {
 			Type type;
 
 			Node(K key, V val);
+			~Node();
 			int insert(Node*);
 			Node* get(K);
 			Node* getLeft();
@@ -78,6 +79,7 @@ namespace tree {
 		};
 
 		Btree();
+		~Btree();
 		bool isEmpty();
 		int size();
 		int depth();
@@ -108,6 +110,10 @@ namespace tree {
 	template <typename K, typename V>
 	Btree<K, V>::Btree() {
 		init();
+	}
+
+	template <typename K, typename V>
+	Btree<K, V>::~Btree() {
 	}
 
 	template <typename K, typename V>
@@ -322,6 +328,10 @@ namespace tree {
 		type = Type::ROOT;
 		this->key = key;
 		this->val = val;
+	}
+
+	template <typename K, typename V>
+	Btree<K, V>::Node::~Node() {
 	}
 
 	template <typename K, typename V>
