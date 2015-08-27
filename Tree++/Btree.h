@@ -146,9 +146,9 @@ namespace tree {
 	template <typename K, typename V>
 	void Btree<K, V>::count(Node* node, int *nodes) {
 		if (node != NULL) {
-			count(node->getLeft(), nodes);
+			count(node->left, nodes);
 			*nodes += 1;
-			count(node->getRight(), nodes);
+			count(node->right, nodes);
 		}
 	}
 
@@ -156,8 +156,8 @@ namespace tree {
 	void Btree<K, V>::count_depth(Node* node, int *depth, int *high) {
 		if (node != NULL) {
 			*depth += 1;
-			count_depth(node->getLeft(), depth, high);
-			count_depth(node->getRight(), depth, high);
+			count_depth(node->left, depth, high);
+			count_depth(node->right, depth, high);
 			if (*depth > *high) *high = *depth;
 			*depth -= 1;
 		}
@@ -205,8 +205,8 @@ namespace tree {
 	template <typename K, typename V>
 	void Btree<K, V>::detatchAll(Node* node) {
 		if (node != NULL) {
-			detatchAll(node->getLeft());
-			detatchAll(node->getRight());
+			detatchAll(node->left);
+			detatchAll(node->right);
 			init();
 		}
 	}
@@ -214,9 +214,9 @@ namespace tree {
 	template <typename K, typename V>
 	void Btree<K, V>::print(Node* node) {
 		if (node != NULL) {
-			print(node->getLeft());
+			print(node->left);
 			cout << node->toString().append("\n");
-			print(node->getRight());
+			print(node->right);
 		}
 	}
 
@@ -233,8 +233,8 @@ namespace tree {
 		} 
 		else {
 			root->insert(newNode);
-			while (root->getType() != Btree<K, V>::Node::Type::ROOT) {
-				root = root->getParent();
+			while (root->type != Btree<K, V>::Node::Type::ROOT) {
+				root = root->parent;
 			}
 		}
 		return *this;
@@ -242,22 +242,22 @@ namespace tree {
 
 	template <typename K, typename V>
 	int Btree<K, V>::Node::insert(Node *newNode) {
-		if (cmp<K>(newNode->getKey(), getKey()) < 0) {
-			if (getLeft() == NULL) {
+		if (cmp<K>(newNode->key, key) < 0) {
+			if (left == NULL) {
 				attachLeftNode(newNode);
 			}
 			else {
-				int weight = abs(getLeft()->insert(newNode));
+				int weight = abs(left->insert(newNode));
 				if (weight == 0) return weight;
 				balance = balance - weight;
 			}
 		}
-		else if (cmp<K>(newNode->getKey(), getKey()) > 0) {
-			if (getRight() == NULL) {
+		else if (cmp<K>(newNode->key, key) > 0) {
+			if (right == NULL) {
 				attachRightNode(newNode);
 			}
 			else {
-				int weight = abs(getRight()->insert(newNode));
+				int weight = abs(right->insert(newNode));
 				if (weight == 0) return weight;
 				balance = balance + weight;
 			}
@@ -346,7 +346,7 @@ namespace tree {
 			break;
 		}
 		if (!isRoot()) {
-			s.append(sep).append("parent: ").append(std::to_string(getParent()->getKey()));
+			s.append(sep).append("parent: ").append(std::to_string(parent->key));
 		}
 		s.append(sep).append("balance: ").append(std::to_string(balance)).append(" ]");
 		return s;
@@ -367,7 +367,7 @@ namespace tree {
 			ostr << "key not found exception: " << std::to_string(key);
 			throw(exception(ostr.str().c_str()));
 		}
-		return node->getVal();
+		return node->val;
 	}
 
 	template <typename K, typename V>
@@ -392,13 +392,13 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
-	typename Btree<K, V>::Node* Btree<K, V>::Node::get(K key) {
+	typename Btree<K, V>::Node* Btree<K, V>::Node::get(K k) {
 		Node *node = NULL;
-		if (cmp<K>(key, getKey()) < 0) {
-			if(hasLeftChild()) node = left->get(key);
+		if (cmp<K>(k, key) < 0) {
+			if(hasLeftChild()) node = left->get(k);
 		}
-		else if (cmp<K>(key, getKey()) > 0) {
-			if (hasRightChild()) node = right->get(key);
+		else if (cmp<K>(k, key) > 0) {
+			if (hasRightChild()) node = right->get(k);
 		}
 		else {
 			node = this;

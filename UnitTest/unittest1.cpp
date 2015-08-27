@@ -3,6 +3,8 @@
 #include "Btree.h"
 #include <time.h>
 #include <map>
+#include <ctime>
+#include <cstdio>
 using namespace tree;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -172,16 +174,6 @@ namespace UnitTest
 			Assert::AreEqual(0, btree.size());
 			Assert::IsNull(btree.beginning());
 			Assert::IsNull(btree.end());
-		}
-		TEST_METHOD(vsRbTree)
-		{
-			rbtree = mapInsertRandom();
-			Assert::IsTrue(rbtree.size() > 0);
-		}
-		TEST_METHOD(vsbTree)
-		{
-			btree = insertRandom();
-			Assert::IsTrue(btree.size() > 0);
 		}
 	};
 }
