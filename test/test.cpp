@@ -20,6 +20,31 @@ Btree<int, int> insertInts(std::vector<int> v) {
 	return btree;
 }
 
+void example() {
+	// create
+	Btree<int, string> btree = Btree<int, string>();
+
+	// inserts
+	btree.insert(1, "a").insert(2, "b").insert(3, "c");
+
+	// query
+	Btree<int, string>::Node *node = btree.get(1);
+	cout << node->getVal();
+
+	// loop
+	for (node = btree.beginning(); node != NULL; node = node->next()) {
+		cout << node->getKey() + ":" + node->getVal();
+	}
+
+	// deletions
+	btree.remove(1);
+	btree.pop();  // removes last node
+	btree.pull(); // removes first node
+
+	// clear tree
+	btree.clear();
+}
+
 map<int, int> mapInsertInts(std::vector<int> v) {
 	map<int, int> rbtree = map<int, int>();
 	for (auto &i : v) {
