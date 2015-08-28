@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <algorithm> 
 using namespace std;
 
 namespace tree {
@@ -123,6 +124,7 @@ namespace tree {
 		void count_depth(Node* node, int *depth, int *high);
 		void print(Node* node);
 		void detatchAll(Node* node);
+		bool pair_cmp(std::pair<K, V>, std::pair<K, V>);
 	};
 
 	template <typename K, typename V>
@@ -265,8 +267,20 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
+	bool Btree<K, V>::pair_cmp(std::pair<K, V> i, std::pair<K, V> j) { 
+		return (i.first < j.first); 
+	}
+
+	template <typename K, typename V>
 	Btree<K, V> Btree<K, V>::insertAll(vector<std::pair<K, V>> v) {
-		for (auto &p : v) {
+		std::sort(v.begin(), v.end());
+		vector<std::pair<K, V>> copy(v);
+
+		for (int i = 0; i < 10; i++) {
+			copy.at(i) = v[i];
+			v.erase(v.begin());
+		}
+		for (auto &p : copy) {
 			insert(p.first, p.second);
 		}
 		return *this;

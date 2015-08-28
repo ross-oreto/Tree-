@@ -186,10 +186,10 @@ namespace UnitTest
 		}
 		TEST_METHOD(TestTreeInsertAll)
 		{
-			vector<std::pair<int, int>> v = randomPairs(100, 1000000);
+			vector<std::pair<int, int>> v = randomPairs(100, 10000000);
 			Btree<int, int> btree = Btree<int, int>();
 			btree.insertAll(v);
-			Assert::IsTrue(btree.size() >= 99);
+			Assert::AreEqual(100, btree.size());
 		}
 	};
 }
