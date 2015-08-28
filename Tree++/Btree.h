@@ -101,6 +101,7 @@ namespace tree {
 		int size();
 		int depth();
 		Btree insert(K, V);
+		Btree insertAll(vector<std::pair<K, V>>);
 		Node* getRoot();
 		Node* beginning();
 		Node* end();
@@ -259,6 +260,14 @@ namespace tree {
 			while (root->type != Btree<K, V>::Node::Type::ROOT) {
 				root = root->parent;
 			}
+		}
+		return *this;
+	}
+
+	template <typename K, typename V>
+	Btree<K, V> Btree<K, V>::insertAll(vector<std::pair<K, V>> v) {
+		for (auto &p : v) {
+			insert(p.first, p.second);
 		}
 		return *this;
 	}

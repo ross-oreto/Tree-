@@ -46,6 +46,15 @@ namespace UnitTest
 		return v;
 	}
 
+	vector<std::pair<int, int>> randomPairs(int size, int max) {
+		vector<std::pair<int, int>> v;
+		for (int i = 0; i < size; i++) {
+			int r = rand() % max;
+			v.push_back(std::pair<int, int>(r, r));
+		}
+		return v;
+	}
+
 	Btree<int, int> insertRandom(int size, int max) {
 		return insertInts(randomInts(size, max));
 	}
@@ -174,6 +183,13 @@ namespace UnitTest
 			Assert::AreEqual(0, btree.size());
 			Assert::IsNull(btree.beginning());
 			Assert::IsNull(btree.end());
+		}
+		TEST_METHOD(TestTreeInsertAll)
+		{
+			vector<std::pair<int, int>> v = randomPairs(100, 1000000);
+			Btree<int, int> btree = Btree<int, int>();
+			btree.insertAll(v);
+			Assert::IsTrue(btree.size() >= 99);
 		}
 	};
 }
