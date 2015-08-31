@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm> 
+#include <list>
 using namespace std;
 
 namespace tree {
@@ -138,7 +139,7 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::init() {
-		root = NULL;
+		root = nullptr;
 	}
 
 	template <typename K, typename V>
@@ -166,12 +167,12 @@ namespace tree {
 
 	template <typename K, typename V>
 	bool Btree<K, V>::isEmpty() {
-		return root == NULL;
+		return root == nullptr;
 	}
 
 	template <typename K, typename V>
 	void Btree<K, V>::count(Node* node, int *nodes) {
-		if (node != NULL) {
+		if (node != nullptr) {
 			count(node->left, nodes);
 			*nodes += 1;
 			count(node->right, nodes);
@@ -180,7 +181,7 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::count_depth(Node* node, int *depth, int *high) {
-		if (node != NULL) {
+		if (node != nullptr) {
 			*depth += 1;
 			count_depth(node->left, depth, high);
 			count_depth(node->right, depth, high);
@@ -204,9 +205,9 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::remove(Node* node) {
-		if (node != NULL) {
+		if (node != nullptr) {
 			Node *newNode = node->remove();
-			if ((newNode != NULL && newNode->isRoot()) || node->isRoot()) {
+			if ((newNode != nullptr && newNode->isRoot()) || node->isRoot()) {
 				root = newNode;
 			}
 		}
@@ -230,7 +231,7 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::detatchAll(Node* node) {
-		if (node != NULL) {
+		if (node != nullptr) {
 			detatchAll(node->left);
 			detatchAll(node->right);
 			init();
@@ -239,7 +240,7 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::print(Node* node) {
-		if (node != NULL) {
+		if (node != nullptr) {
 			print(node->left);
 			cout << *node << endl;
 			print(node->right);
@@ -273,14 +274,9 @@ namespace tree {
 
 	template <typename K, typename V>
 	Btree<K, V> Btree<K, V>::insertAll(vector<std::pair<K, V>> v) {
-		std::sort(v.begin(), v.end());
-		vector<std::pair<K, V>> copy(v);
+		//std::sort(v.begin(), v.end());
 
-		for (int i = 0; i < 10; i++) {
-			copy.at(i) = v[i];
-			v.erase(v.begin());
-		}
-		for (auto &p : copy) {
+		for (auto &p : v) {
 			insert(p.first, p.second);
 		}
 		return *this;
@@ -289,7 +285,7 @@ namespace tree {
 	template <typename K, typename V>
 	int Btree<K, V>::Node::insert(Node *newNode) {
 		if (cmp<K>(newNode->key, key) < 0) {
-			if (left == NULL) {
+			if (left == nullptr) {
 				attachLeftNode(newNode);
 			}
 			else {
@@ -299,7 +295,7 @@ namespace tree {
 			}
 		}
 		else if (cmp<K>(newNode->key, key) > 0) {
-			if (right == NULL) {
+			if (right == nullptr) {
 				attachRightNode(newNode);
 			}
 			else {
@@ -376,15 +372,15 @@ namespace tree {
 
 	template <typename K, typename V>
 	void Btree<K, V>::Node::init() {
-		left = NULL;
-		right = NULL;
-		parent = NULL;
+		left = nullptr;
+		right = nullptr;
+		parent = nullptr;
 		balance = 0;
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::get(K key) {
-		Node *node = NULL;
+		Node *node = nullptr;
 		if (!isEmpty()) node = root->get(key);
 		return node;
 	}
@@ -392,7 +388,7 @@ namespace tree {
 	template <typename K, typename V>
 	V Btree<K, V>::getVal(K key) {
 		Node *node = get(key);
-		if (node == NULL) {
+		if (node == nullptr) {
 			std::stringstream ostr;
 			ostr << "key not found exception: " << std::to_string(key);
 			throw(exception(ostr.str().c_str()));
@@ -402,10 +398,10 @@ namespace tree {
 
 	template <typename K, typename V>
 	bool Btree<K, V>::contains(K key) {
-		Node *node = NULL;
+		Node *node = nullptr;
 		bool contains = false;
 		if (!isEmpty()) node = root->get(key);
-		if (node != NULL) contains = true;
+		if (node != nullptr) contains = true;
 		return contains;
 	}
 
@@ -423,7 +419,7 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::get(K k) {
-		Node *node = NULL;
+		Node *node = nullptr;
 		if (cmp<K>(k, key) < 0) {
 			if(hasLeftChild()) node = left->get(k);
 		}
@@ -443,13 +439,13 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::beginning() {
-		if (isEmpty()) return NULL;
+		if (isEmpty()) return nullptr;
 		return root->beginning();
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::end() {
-		if (isEmpty()) return NULL;
+		if (isEmpty()) return nullptr;
 		return root->end();
 	}
 
@@ -470,13 +466,13 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::next() {
-		Node *next = NULL;
+		Node *next = nullptr;
 		if (hasRightChild()) {
 			next = right->beginning();
 		}
 		else if (hasParent()) {
 			Node* node = this;
-			while (node->parent != NULL) {
+			while (node->parent != nullptr) {
 				node = node->parent;
 				if (cmp(node->val, val) > 0) {
 					next = node;
@@ -490,7 +486,7 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::beginning() {
 		Node *beginning = this;
-		while (beginning->left != NULL) {
+		while (beginning->left != nullptr) {
 			beginning = beginning->left;
 		}
 		return beginning;
@@ -499,7 +495,7 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::end() {
 		Node *end = this;
-		while (end->right != NULL) {
+		while (end->right != nullptr) {
 			end = end->right;
 		}
 		return end;
@@ -507,13 +503,13 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::previous() {
-		Node *last = NULL;
+		Node *last = nullptr;
 		if (hasLeftChild()) {
 			last = left->end();
 		}
 		else if (hasParent()) {
 			Node* node = this;
-			while (node->parent != NULL) {
+			while (node->parent != nullptr) {
 				node = node->parent;
 				if (cmp(node->val, val) < 0) {
 					last = node;
@@ -527,17 +523,17 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::remove() {
 		Node *node = parent;
-		Node *replace = NULL;
-		if (node == NULL) {
+		Node *replace = nullptr;
+		if (node == nullptr) {
 			replace = previous();
-			if (replace == NULL) replace = next();
-			if (replace != NULL) {
+			if (replace == nullptr) replace = next();
+			if (replace != nullptr) {
 				Node *replaceParent = replace->parent;
 				replace->attachLeftNode(detachLeftNode(), false);
 				replace->attachRightNode(detachRightNode(), false);
 				replace->type = Type::ROOT;
-				if (replace->right == replace) replace->right = NULL;
-				if (replace->left == replace) replace->left = NULL;
+				if (replace->right == replace) replace->right = nullptr;
+				if (replace->left == replace) replace->left = nullptr;
 				node = replaceParent;
 			}
 		}
@@ -565,14 +561,14 @@ namespace tree {
 		}
 		init();
 		Node *newRoot = notifyParents(node);
-		if (newRoot != NULL) replace = newRoot;
+		if (newRoot != nullptr) replace = newRoot;
 		return replace;
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::notifyParents(Node* node) {
 		Type nodeType = type;
-		while (node != NULL) {
+		while (node != nullptr) {
 			if (nodeType == Type::LEFT) node->balance += 1;
 			else if (nodeType == Type::RIGHT) node->balance -= 1;
 
@@ -589,15 +585,15 @@ namespace tree {
 				}
 			}
 			nodeType = node->type;
-			node = node->balance == 0 ? node->parent : NULL;
+			node = node->balance == 0 ? node->parent : nullptr;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::attachLeftNode(Node *node, bool addWeight) {
 		left = node;
-		if (node != NULL) {
+		if (node != nullptr) {
 			node->type = Type::LEFT;
 			node->parent = this;
 			if (addWeight) {
@@ -610,7 +606,7 @@ namespace tree {
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::attachRightNode(Node *node, bool addWeight) {
 		right = node;
-		if (node != NULL) {
+		if (node != nullptr) {
 			node->type = Type::RIGHT;
 			node->parent = this;
 			if (addWeight) {
@@ -638,11 +634,11 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::detachLeftNode() {
-		Node *node = NULL;
+		Node *node = nullptr;
 		if (hasLeftChild()) {
 			node = left;
-			left = NULL;
-			node->parent = NULL;
+			left = nullptr;
+			node->parent = nullptr;
 			return node;
 		}
 		return node;
@@ -650,25 +646,25 @@ namespace tree {
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::detachRightNode() {
-		Node *node = NULL;
+		Node *node = nullptr;
 		if (hasRightChild()) {
 			node = right;
-			right = NULL;
-			node->parent = NULL;
+			right = nullptr;
+			node->parent = nullptr;
 		}
 		return node;
 	}
 
 	template <typename K, typename V>
 	typename Btree<K, V>::Node* Btree<K, V>::Node::detachNode(Type type) {
-		Node *node = NULL;
+		Node *node = nullptr;
 		if (type == Type::LEFT) node = detachLeftNode();
 		else if (type == Type::RIGHT) node = detachRightNode();
 		return node;
 	}
 
 	template <typename K, typename V>
-	typename void Btree<K, V>::Node::replace(Node *node) {
+	void Btree<K, V>::Node::replace(Node *node) {
 		val = node->val;
 	}
 
@@ -688,57 +684,57 @@ namespace tree {
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasParent() {
-		return parent != NULL;
+	bool Btree<K, V>::Node::hasParent() {
+		return parent != nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasTwoChildren() {
-		return right != NULL && left != NULL;
+	bool Btree<K, V>::Node::hasTwoChildren() {
+		return right != nullptr && left != nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasChild() {
-		return right != NULL || left != NULL;
+	bool Btree<K, V>::Node::hasChild() {
+		return right != nullptr || left != nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasNoChildren() {
-		return right == NULL && left == NULL;
+	bool Btree<K, V>::Node::hasNoChildren() {
+		return right == nullptr && left == nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasRightChild() {
-		return right != NULL;
+	bool Btree<K, V>::Node::hasRightChild() {
+		return right != nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::hasLeftChild() {
-		return left != NULL;
+	bool Btree<K, V>::Node::hasLeftChild() {
+		return left != nullptr;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::isRightChild() {
+	bool Btree<K, V>::Node::isRightChild() {
 		return type == Type::RIGHT;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::isLeftChild() {
+	bool Btree<K, V>::Node::isLeftChild() {
 		return type == Type::LEFT;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::isRoot() {
+	bool Btree<K, V>::Node::isRoot() {
 		return type == Type::ROOT;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::leansLeft() {
+	bool Btree<K, V>::Node::leansLeft() {
 		return balance < 0;
 	}
 
 	template <typename K, typename V>
-	typename bool Btree<K, V>::Node::leansRight() {
+	bool Btree<K, V>::Node::leansRight() {
 		return balance > 0;
 	}
 }

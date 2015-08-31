@@ -32,7 +32,7 @@ void example() {
 	cout << node->getVal();
 
 	// loop
-	for (node = btree.beginning(); node != NULL; node = node->next()) {
+	for (node = btree.beginning(); node != nullptr; node = node->next()) {
 		cout << node->getKey() + ":" + node->getVal();
 	}
 
@@ -97,7 +97,7 @@ void runOps(int size, int max) {
 	for (int i = 0; i < queries; i++) {
 		btree.get(v.at(rand() % size));
 	}
-	for (Btree<int, int>::Node *node = btree.beginning(); node != NULL; node = node->next()) {
+	for (Btree<int, int>::Node *node = btree.beginning(); node != nullptr; node = node->next()) {
 		assert(node->getKey() == node->getVal());
 	}
 	btree.clear();
@@ -148,7 +148,7 @@ int main()
 {
 	_set_error_mode(_OUT_TO_MSGBOX);
 	try {
-		srand(time(NULL));
+		srand(time(nullptr));
 		benchmarkInserts();
 	}
 	catch (const std::exception &e) {
