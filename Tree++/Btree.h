@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <algorithm> 
 #include <list>
 using namespace std;
 
@@ -274,8 +273,6 @@ namespace tree {
 
 	template <typename K, typename V>
 	Btree<K, V> Btree<K, V>::insertAll(vector<std::pair<K, V>> v) {
-		//std::sort(v.begin(), v.end());
-
 		for (auto &p : v) {
 			insert(p.first, p.second);
 		}
